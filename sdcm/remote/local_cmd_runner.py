@@ -59,7 +59,7 @@ class LocalCmdRunner(CommandRunner):  # pylint: disable=too-few-public-methods
 
             start_time = time.perf_counter()
             if verbose:
-                self.log.debug('Running command "%s"...', cmd)
+                self.log.info('Running command "%s"...', cmd)
             try:
                 command_kwargs = dict(
                     command=cmd, warn=ignore_status,

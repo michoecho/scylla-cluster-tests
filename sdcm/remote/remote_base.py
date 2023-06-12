@@ -281,7 +281,7 @@ class RemoteCmdRunnerBase(CommandRunner):  # pylint: disable=too-many-instance-a
         """
 
         # pylint: disable=too-many-branches,too-many-locals
-        self.log.debug('Send files (src) %s -> (dst) %s', src, dst)
+        self.log.info('Send files (src) %s -> (dst) %s', src, dst)
         # Start a master SSH connection if necessary.
         source_is_dir = False
         if isinstance(src, str):
@@ -292,6 +292,7 @@ class RemoteCmdRunnerBase(CommandRunner):  # pylint: disable=too-many-instance-a
         # If rsync is disabled or fails, try scp.
         try_scp = True
         files_sent = True
+        self.log.info('HERESCP')
         if self.use_rsync():
             try:
                 local_sources = [quote(os.path.expanduser(path)) for path in src]
@@ -304,6 +305,7 @@ class RemoteCmdRunnerBase(CommandRunner):  # pylint: disable=too-many-instance-a
                 files_sent = False
 
         if try_scp:
+            self.log.info('TRYSCP')
             # scp has no equivalent to --delete, just drop the entire dest dir
             if delete_dst:
                 dest_exists = False
@@ -340,15 +342,17 @@ class RemoteCmdRunnerBase(CommandRunner):  # pylint: disable=too-many-instance-a
                     self.run(cmd, verbose=verbose)
 
             local_sources = self._make_rsync_compatible_source(src, True)
+            self.log.info('LOCALSOURCES %s', local_sources)
             if local_sources:
                 scp = self._make_scp_cmd(local_sources, remote_dest)
+                self.log.info('SCP %s', scp)
                 try:
-                    result = LocalCmdRunner().run(scp)
+                    result = LocalCmdRunner().run(scp, verbose=verbose)
                 except self.exception_unexpected as ex:
                     if self._is_error_retryable(ex.result.stderr):
                         raise RetryableNetworkException(ex.result.stderr, original=ex) from ex
                     raise
-                self.log.debug('Command %s with status %s', result.command, result.exited)
+                self.log.info('Command %s with status %s', result.command, result.exited)
                 if result.exited:
                     files_sent = False
         return files_sent
@@ -378,7 +382,7 @@ class RemoteCmdRunnerBase(CommandRunner):  # pylint: disable=too-many-instance-a
         """
         if escape:
             paths = [self._scp_remote_escape(path) for path in paths]
-        return '%s@[%s]:"%s"' % (self.user, self.hostname, " ".join(paths))
+        return '%s@[%s]:%s' % (self.user, self.hostname, " ".join(paths))
 
     def _make_scp_cmd(self, src: str, dst: str, connect_timeout: int = 300, alive_interval: int = 300) -> str:
         """
@@ -391,9 +395,10 @@ class RemoteCmdRunnerBase(CommandRunner):  # pylint: disable=too-many-instance-a
             key_option = '-i %s' % os.path.expanduser(self.key_file)
         command = ("scp -r -o StrictHostKeyChecking=no -o BatchMode=yes "
                    "-o ConnectTimeout=%d -o ServerAliveInterval=%d "
-                   "-o UserKnownHostsFile=%s -P %d %s %s '%s'")
+                   "-o UserKnownHostsFile=%s -P %d %s %s %s")
+        import shlex
         return command % (connect_timeout, alive_interval,
-                          self.known_hosts_file, self.port, key_option, " ".join(src), dst)
+                          self.known_hosts_file, self.port, key_option, " ".join(src), shlex.quote(dst))
 
     def _make_rsync_compatible_globs(self, pth: str, is_local: bool) -> List[str]:
         """
@@ -415,6 +420,7 @@ class RemoteCmdRunnerBase(CommandRunner):  # pylint: disable=too-many-instance-a
         # make a function to test if a pattern matches any files
         if is_local:
             def glob_matches_files(path, pattern):
+                self.log.info('GLOB %s %s %s', path, pattern, glob.glob(path + pattern))
                 return glob.glob(path + pattern)
         else:
             def glob_matches_files(path, pattern):
@@ -428,7 +434,7 @@ class RemoteCmdRunnerBase(CommandRunner):  # pylint: disable=too-many-instance-a
 
         # convert them into a set of paths suitable for the commandline
         if is_local:
-            return ["\"%s\"%s" % (quote(pth), pattern)
+            return [(quote(pth) + pattern)
                     for pattern in patterns]
         else:
             return [self._scp_remote_escape(pth) + pattern
