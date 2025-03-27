@@ -1,0 +1,6 @@
+append_scylla_yaml:
+  sstable_compression_dictionaries_enable_writing: true
+  sstable_compression_dictionaries_retrain_period_in_seconds: 600
+  sstable_compression_dictionaries_autotrainer_tick_period_in_seconds: 600
+  sstable_compression_dictionaries_min_training_improvement_factor: 777.0
+  sstable_compression_dictionaries_min_training_dataset_bytes: 32000000

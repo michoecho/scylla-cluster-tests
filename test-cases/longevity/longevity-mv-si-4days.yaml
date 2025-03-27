@@ -1,20 +1,20 @@
-test_duration: 6550
-prepare_write_cmd: ["cassandra-stress user profile=/tmp/c-s_profile_4mv_5queries.yaml ops'(insert=15,read1=1,read2=1,read3=1,read4=1,read5=1)' cl=QUORUM n=100000000 -mode cql3 native -rate threads=200",
-                    "cassandra-stress user profile=/tmp/c-s_profile_3si_5queries.yaml ops'(insert=25,si_read1=1,si_read2=1,si_read3=1,si_read4=1,si_read5=1)' cl=QUORUM n=100000000 -mode cql3 native -rate threads=200"
+test_duration: 420
+prepare_write_cmd: ["cassandra-stress user profile=/tmp/c-s_profile_4mv_5queries.yaml ops'(insert=15,read1=1,read2=1,read3=1,read4=1,read5=1)' cl=QUORUM n=10000000 -mode cql3 native -rate threads=200",
+                    "cassandra-stress user profile=/tmp/c-s_profile_3si_5queries.yaml ops'(insert=25,si_read1=1,si_read2=1,si_read3=1,si_read4=1,si_read5=1)' cl=QUORUM n=10000000 -mode cql3 native -rate threads=200"
                    ]
-stress_read_cmd: ["cassandra-stress user profile=/tmp/c-s_profile_4mv_5queries.yaml ops'(insert=15,read1=1,read2=1,read3=1,read4=1,read5=1)' cl=QUORUM duration=5760m -mode cql3 native -rate threads=10",
-                  "cassandra-stress user profile=/tmp/c-s_profile_2mv_2queries.yaml ops'(insert=6,mv_p_read1=1,mv_p_read2=1)' cl=QUORUM duration=5760m -mode cql3 native -rate threads=10",
-                  "cassandra-stress user profile=/tmp/c-s_profile_3si_5queries.yaml ops'(insert=25,si_read1=1,si_read2=1,si_read3=1,si_read4=1,si_read5=1)' cl=QUORUM duration=5760m -mode cql3 native -rate threads=10",
-                  "cassandra-stress user profile=/tmp/c-s_profile_2si_2queries.yaml ops'(insert=10,si_p_read1=1,si_p_read2=1)' cl=QUORUM duration=5760m -mode cql3 native -rate threads=10"
+stress_read_cmd: ["cassandra-stress user profile=/tmp/c-s_profile_4mv_5queries.yaml ops'(insert=15,read1=1,read2=1,read3=1,read4=1,read5=1)' cl=QUORUM duration=360m -mode cql3 native -rate threads=10",
+                  "cassandra-stress user profile=/tmp/c-s_profile_2mv_2queries.yaml ops'(insert=6,mv_p_read1=1,mv_p_read2=1)' cl=QUORUM duration=360m -mode cql3 native -rate threads=10",
+                  "cassandra-stress user profile=/tmp/c-s_profile_3si_5queries.yaml ops'(insert=25,si_read1=1,si_read2=1,si_read3=1,si_read4=1,si_read5=1)' cl=QUORUM duration=360m -mode cql3 native -rate threads=10",
+                  "cassandra-stress user profile=/tmp/c-s_profile_2si_2queries.yaml ops'(insert=10,si_p_read1=1,si_p_read2=1)' cl=QUORUM duration=360m -mode cql3 native -rate threads=10"
 
                  ]
 run_fullscan: ['{"mode": "table", "ks_cf": "random", "interval": 15}']
 
-n_db_nodes: 5
+n_db_nodes: 4
 n_loaders: 2
 n_monitor_nodes: 1
 
-instance_type_db: 'i4i.8xlarge'
+instance_type_db: 'i4i.xlarge'
 gce_instance_type_db: 'n2-highmem-64'
 gce_n_local_ssd_disk_db: 16
 
@@ -24,10 +24,14 @@ root_disk_size_runner: 120
 
 nemesis_class_name: 'SisyphusMonkey'
 nemesis_seed: '023'
-nemesis_interval: 30
+nemesis_interval: 20
 
 user_prefix: 'longevity-mv-si-4d'
 
 space_node_threshold: 644245
 
 use_preinstalled_scylla: true
+
+append_scylla_args: '--blocked-reactor-notify-ms 10 --abort-on-lsa-bad-alloc 1 --abort-on-seastar-bad-alloc --abort-on-internal-error 1 --abort-on-ebadf 1 --enable-sstable-key-validation 1 --logger-log-level=sstable_compressor_factory=debug --logger-log-level=sstable_dict_autotrainer=debug'
+experimental_features:
+  - views-with-tablets

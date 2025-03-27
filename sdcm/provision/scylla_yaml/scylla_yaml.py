@@ -306,6 +306,14 @@ class ScyllaYaml(BaseModel):  # pylint: disable=too-few-public-methods,too-many-
     max_clustering_key_restrictions_per_query: int = None  # 100
     max_memory_for_unlimited_query: int = None  # 1048576
     initial_sstable_loading_concurrency: str = None  # '4u'
+
+    sstable_compression_dictionaries_enable_writing: bool = None
+    sstable_compression_dictionaries_memory_budget_fraction: float = None
+    sstable_compression_dictionaries_retrain_period_in_seconds: float = None
+    sstable_compression_dictionaries_autotrainer_tick_period_in_seconds: float = None
+    sstable_compression_dictionaries_min_training_dataset_bytes: int = None
+    sstable_compression_dictionaries_min_training_improvement_factor: float = None
+
     enable_3_1_0_compatibility_mode: bool = None  # False
     enable_user_defined_functions: bool = None  # False
     user_defined_function_time_limit_ms: int = None  # 10
