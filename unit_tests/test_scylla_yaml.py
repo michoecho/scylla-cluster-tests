@@ -249,6 +249,7 @@ class ScyllaYamlTest(unittest.TestCase):
                 'enable_sstable_key_validation': None,
                 'enable_sstables_mc_format': None,
                 'enable_sstables_md_format': None,
+                'sstable_format': None,
                 'enable_user_defined_functions': None,
                 'endpoint_snitch': None,
                 'experimental_features': None,

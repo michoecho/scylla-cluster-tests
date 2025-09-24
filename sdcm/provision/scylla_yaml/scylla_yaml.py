@@ -301,6 +301,7 @@ class ScyllaYaml(BaseModel):
     view_building: bool = None  # True
     enable_sstables_mc_format: bool = None  # True
     enable_sstables_md_format: bool = None  # False
+    sstable_format: Literal["me", "ms"] = None  # "me"
     enable_dangerous_direct_import_of_cassandra_counters: bool = None  # False
     enable_shard_aware_drivers: bool = None  # True
     enable_ipv6_dns_lookup: bool = None  # False
