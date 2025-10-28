@@ -1845,6 +1845,10 @@ class BaseNode(AutoSshContainerMixin):
                     message=f"Scylla help contains duplicate for the following arguments: {','.join(dups)}"
                 ).publish()
             )
+            myid = self.node_index
+            if self.name.find('oracle'):
+                myid += 128
+            append_scylla_args += f" --node-id={myid}"
             append_scylla_args = scylla_arg_parser.filter_args(
                 append_scylla_args,
                 unknown_args_cb=lambda args: ScyllaHelpErrorEvent.filtered(
