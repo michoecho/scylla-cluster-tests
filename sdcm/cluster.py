@@ -4463,6 +4463,10 @@ class BaseScyllaCluster:
                 ).publish()
 
         def update_scylla_packages(node):
+            if "oracle" in node.name:
+                node.log.info('Not updating DB packages on the oracle')
+                return
+
             node.log.info('Updating DB packages')
             node.remoter.run('mkdir -p /tmp/scylla')
             node.remoter.send_files(new_scylla_bin, '/tmp/scylla', verbose=True)
